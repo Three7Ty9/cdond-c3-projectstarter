@@ -3,13 +3,6 @@ orbs:
   aws-cli: circleci/aws-cli@3.1.4
 
 commands:
-  notify_on_failure:
-    steps:
-      - slack/notify:
-          event: fail
-          channel: cicd-pipeline
-          template: basic_fail_1
-
   revert-migrations:
     description: Revert the last migration, if any were executed during the current workflow
     parameters:
