@@ -407,9 +407,9 @@ jobs:
             if curl -s $FRONTEND_WEBSITE -v | grep "Welcome"
             then
               # This is the intentional error, if "Welcome" is indeed in the response this step will exit with exit code 1
-              exit 0
-            else
               exit 1
+            else
+              exit 2
             fi
 
       - revert-migrations
@@ -535,22 +535,22 @@ workflows:
       #     #   branches:
       #     #     only: [Cloud-DevOps]
 
-      # - deploy-infrastructure:
+      - deploy-infrastructure
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # - configure-infrastructure
-      #     requires: [deploy-infrastructure]
-      - run-migrations
-      #     requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: [deploy-backend]
-      # - cleanup:
-      #     requires: [cloudfront-update]
-      # - smoke-test:
-      #     requires: [cleanup]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [deploy-frontend]
+      - cloudfront-update:
+          requires: [deploy-backend]
+      - cleanup:
+          requires: [cloudfront-update]
+      - smoke-test:
+          requires: [cleanup]
       # - notify_on_success:
       #     requires:
       #       - smoke-test
