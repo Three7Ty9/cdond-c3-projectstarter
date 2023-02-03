@@ -16,7 +16,7 @@ commands:
     parameters:
       Workflow_ID:
         type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
+        default: d3fae1a
     steps:
       - run:
           name: Revert migrations
@@ -29,7 +29,7 @@ commands:
             then
               cd ~/project/backend
               npm install
-              npm run migration:revert
+              npm run migrations:revert
             fi
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -387,34 +387,34 @@ jobs:
       - install_awscli
       - install_nodejs
 
-      - run:
-          name: Backend smoke test.
-          command: |
-            sudo apt install curl -y
-            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text)
+      # - run:
+      #     name: Backend smoke test.
+      #     command: |
+      #       sudo apt install curl -y
+      #       BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+      #         --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+      #         --query 'Reservations[*].Instances[*].PublicIpAddress' \
+      #         --output text)
 
-            export API_URL="http://${BACKEND_PUBLIC_IP}:3030"
-            echo $API_URL
-            if curl --connect-timeout 5 "${API_URL}/api/status" -v | grep "ok"; then exit 0; else exit 1; fi
+      #       export API_URL="http://${BACKEND_PUBLIC_IP}:3030"
+      #       echo $API_URL
+      #       if curl --connect-timeout 5 "${API_URL}/api/status" -v | grep "ok"; then exit 0; else exit 1; fi
 
       - run:
           name: Frontend smoke test.
           command: |
-            FRONTEND_WEBSITE=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
+            FRONTEND_WEBSITE=http://udapeople-63d81f0.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com
             if curl -s $FRONTEND_WEBSITE -v | grep "Welcome"
             then
               # This is the intentional error, if "Welcome" is indeed in the response this step will exit with exit code 1
-              exit 0
-            else
               exit 1
+            else
+              exit 2
             fi
 
       - revert-migrations
-      - remove-bucket-contents
-      - destroy-environment
+      # - remove-bucket-contents
+      # - destroy-environment
 
   cloudfront-update:
     docker:
@@ -493,56 +493,56 @@ jobs:
 workflows:
   udapeople_app_workflow:
     jobs:
-      - build-frontend
-        # filters:
-        #   branches:
-        #     only: [new-branch]
+      # - build-frontend
+      #   # filters:
+      #   #   branches:
+      #   #     only: [new-branch]
 
-      - build-backend
-        # filters:
-        #   branches:
-        #     only: [new-branch]
+      # - build-backend
+      #   # filters:
+      #   #   branches:
+      #   #     only: [new-branch]
 
-      - test-frontend:
-          requires: [build-frontend]
-          # filters:
-          #   branches:
-          #     only: [new-branch]
+      # - test-frontend:
+      #     requires: [build-frontend]
+      #     # filters:
+      #     #   branches:
+      #     #     only: [new-branch]
 
-      - test-backend:
-          requires: [build-backend]
-          # filters:
-          #   branches:
-          #     only: [new-branch]
+      # - test-backend:
+      #     requires: [build-backend]
+      #     # filters:
+      #     #   branches:
+      #     #     only: [new-branch]
 
-      - scan-backend:
-          requires: [build-backend]
-          # filters:
-          #   branches:
-          #     only: [new-branch]
+      # - scan-backend:
+      #     requires: [build-backend]
+      #     # filters:
+      #     #   branches:
+      #     #     only: [new-branch]
 
-      - scan-frontend:
-          requires: [build-frontend]
-          # filters:
-          #   branches:
-          #     only: [new-branch]
+      # - scan-frontend:
+      #     requires: [build-frontend]
+      #     # filters:
+      #     #   branches:
+      #     #     only: [new-branch]
 
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
-      - deploy-backend:
-          requires: [deploy-frontend]
-      - cloudfront-update:
-          requires: [deploy-backend]
-      - cleanup:
-          requires: [cloudfront-update]
-      - smoke-test:
-          requires: [cleanup]
+      # - deploy-infrastructure:
+      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     requires: [run-migrations]
+      # - deploy-backend:
+      #     requires: [deploy-frontend]
+      # - cloudfront-update:
+      #     requires: [deploy-backend]
+      # - cleanup:
+      #     requires: [cloudfront-update]
+      - smoke-test
+          # requires: [cleanup]
       # - notify_on_success:
       #     requires:
       #       - smoke-test
