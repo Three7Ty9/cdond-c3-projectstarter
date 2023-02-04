@@ -370,7 +370,9 @@ jobs:
           command: |
             apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
       - restore_cache:
-          keys: [backend-build]      - run:
+          keys: [backend-build]     
+          
+      - run:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
